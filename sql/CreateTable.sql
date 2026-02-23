@@ -26,13 +26,23 @@ BEGIN
 
     -- Query 2: Top 100 longest fares by trip_distance
     CREATE NONCLUSTERED INDEX [IX_TaxiTrips_TripDistance]
-        ON [dbo].[TaxiTrips] ([TripDistance] DESC);
+        ON [dbo].[TaxiTrips] ([TripDistance] DESC)
+        INCLUDE ([PickupDateTimeUtc], [DropoffDateTimeUtc], [PassengerCount],
+                 [StoreAndFwdFlag], [PULocationID], [DOLocationID],
+                 [FareAmount], [TipAmount], [TravelTimeSeconds]);
 
     -- Query 3: Top 100 longest fares by travel time
     CREATE NONCLUSTERED INDEX [IX_TaxiTrips_TravelTime]
-        ON [dbo].[TaxiTrips] ([TravelTimeSeconds] DESC);
+        ON [dbo].[TaxiTrips] ([TravelTimeSeconds] DESC)
+        INCLUDE ([PickupDateTimeUtc], [DropoffDateTimeUtc], [PassengerCount],
+                 [TripDistance], [StoreAndFwdFlag], [PULocationID],
+                 [DOLocationID], [FareAmount], [TipAmount]);
 
-    -- Query 4: General searches filtered by PULocationID
-    -- Covered by IX_TaxiTrips_PULocationID_TipAmount above
+    -- Query 4: General searches filtered by PULocationID (wide covering index)
+    CREATE NONCLUSTERED INDEX [IX_TaxiTrips_PULocationID_All]
+        ON [dbo].[TaxiTrips] ([PULocationID])
+        INCLUDE ([PickupDateTimeUtc], [DropoffDateTimeUtc], [PassengerCount],
+                 [TripDistance], [StoreAndFwdFlag], [DOLocationID],
+                 [FareAmount], [TipAmount], [TravelTimeSeconds]);
 END
 GO
